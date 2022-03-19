@@ -1,5 +1,6 @@
 package br.com.dio.desafio.dominio;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -7,63 +8,77 @@ import java.util.Set;
 
 public class Dev {
     private String nome;
-    private Set<Conteudo> conteudosIncrinstos = new LinkedHashSet<>();
-    private Set<Conteudo> conteudosConcluidos = new LinkedHashSet<>();
+    private Set<Conteudo> conteudosInscritos = new LinkedHashSet();
+    private Set<Conteudo> conteudosConcluidos = new LinkedHashSet();
 
-    public void inscreverBootcamp(Bootcamp bootcamp){
-        this.conteudosIncrinstos.addAll(bootcamp.getConteudos());
+    public Dev() {
+    }
+
+    public void inscreverBootcamp(Bootcamp bootcamp) {
+        this.conteudosInscritos.addAll(bootcamp.getConteudos());
         bootcamp.getDevsInscritos().add(this);
+    }
+
+    public void progredir() {
+        Optional<Conteudo> conteudo = this.conteudosInscritos.stream().findFirst();
+        if (conteudo.isPresent()) {
+            this.conteudosConcluidos.add((Conteudo)conteudo.get());
+            this.conteudosInscritos.remove(conteudo.get());
+        } else {
+            System.err.println("Você não está matriculado em nenhum conteúdo!");
+        }
 
     }
 
-    public  void progredir(){}
-    Optional<Conteudo> conteudo = this.conteudosIncrinstos.stream().findFirst();
+    public double calcularTotalXp() {
+        Iterator<Conteudo> iterator = this.conteudosConcluidos.iterator();
 
-    if(conteudo.isPresent()){
-        this.conteudosConcluidos.add(conteudo.get());
-        this.conteudosIncrinstos.remove(conteudo.get())
-    }else{
-        System.err.println("Você não está matrículado em nenhum conteúdo!");
-    }
+        double soma;
+        double next;
+        for(soma = 0.0D; iterator.hasNext(); soma += next) {
+            next = ((Conteudo)iterator.next()).calcularXp();
+        }
 
-    public  double calculatTotalXp(){
-        return this.conteudosConcluidos.stream().mapToDouble(conteudo -> conteudo.calcularXp()).sum();
+        return soma;
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public Set<Conteudo> getConteudosIncrinstos() {
-        return conteudosIncrinstos;
+    public Set<Conteudo> getConteudosInscritos() {
+        return this.conteudosInscritos;
     }
 
-    public void setConteudosIncrinstos(Set<Conteudo> conteudosIncrinstos) {
-        this.conteudosIncrinstos = conteudosIncrinstos;
+    public void setConteudosInscritos(Set<Conteudo> conteudosInscritos) {
+        this.conteudosInscritos = conteudosInscritos;
     }
 
     public Set<Conteudo> getConteudosConcluidos() {
-        return conteudosConcluidos;
+        return this.conteudosConcluidos;
     }
 
     public void setConteudosConcluidos(Set<Conteudo> conteudosConcluidos) {
         this.conteudosConcluidos = conteudosConcluidos;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Dev dev = (Dev) o;
-        return Objects.equals(nome, dev.nome) && Objects.equals(conteudosIncrinstos, dev.conteudosIncrinstos) && Objects.equals(conteudosConcluidos, dev.conteudosConcluidos);
+        if (this == o) {
+            return true;
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Dev dev = (Dev)o;
+            return Objects.equals(this.nome, dev.nome) && Objects.equals(this.conteudosInscritos, dev.conteudosInscritos) && Objects.equals(this.conteudosConcluidos, dev.conteudosConcluidos);
+        } else {
+            return false;
+        }
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(nome, conteudosIncrinstos, conteudosConcluidos);
+        return Objects.hash(new Object[]{this.nome, this.conteudosInscritos, this.conteudosConcluidos});
     }
 }
+
